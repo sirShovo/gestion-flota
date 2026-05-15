@@ -5,6 +5,16 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
+    
+    private JPanel contentArea;
+    private CardLayout cardLayout;
+    
+    // Panel instances
+    private PanelDashboard panelDashboard;
+    private PanelConductores panelConductores;
+    private PanelVehiculos panelVehiculos;
+    private PanelAsignaciones panelAsignaciones;
+    private PanelMantenimientos panelMantenimientos;
 
     public MainFrame() {
         setTitle("CRM - Gestión de Flota Vehicular");
@@ -38,22 +48,55 @@ public class MainFrame extends JFrame {
         sidebar.add(btnMantenimientos);
 
         // --- Main Content Area ---
-        JPanel contentArea = new JPanel(new BorderLayout());
+        cardLayout = new CardLayout();
+        contentArea = new JPanel(cardLayout);
         contentArea.setBackground(Color.WHITE);
         contentArea.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true));
         
-        // A simple title for the dashboard for now
-        JLabel lblTitle = new JLabel("Bienvenido al CRM de Flota", SwingConstants.CENTER);
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        lblTitle.setForeground(new Color(51, 65, 85)); // Slate-700
+        // Instantiate real panels
+        panelDashboard = new PanelDashboard();
+        panelConductores = new PanelConductores();
+        panelVehiculos = new PanelVehiculos();
+        panelAsignaciones = new PanelAsignaciones();
+        panelMantenimientos = new PanelMantenimientos();
         
-        contentArea.add(lblTitle, BorderLayout.CENTER);
+        // Añadir paneles al CardLayout
+        contentArea.add(panelDashboard, "Dashboard");
+        contentArea.add(panelConductores, "Conductores");
+        contentArea.add(panelVehiculos, "Vehiculos");
+        contentArea.add(panelAsignaciones, "Asignaciones");
+        contentArea.add(panelMantenimientos, "Mantenimientos");
+
+        // Listeners for buttons - ALWAYS reload data before showing the panel
+        btnDashboard.addActionListener(e -> {
+            panelDashboard.cargarDatos();
+            cardLayout.show(contentArea, "Dashboard");
+        });
+        btnConductores.addActionListener(e -> {
+            panelConductores.cargarDatos();
+            cardLayout.show(contentArea, "Conductores");
+        });
+        btnVehiculos.addActionListener(e -> {
+            panelVehiculos.cargarDatos();
+            cardLayout.show(contentArea, "Vehiculos");
+        });
+        btnAsignaciones.addActionListener(e -> {
+            panelAsignaciones.cargarDatos();
+            cardLayout.show(contentArea, "Asignaciones");
+        });
+        btnMantenimientos.addActionListener(e -> {
+            panelMantenimientos.cargarDatos();
+            cardLayout.show(contentArea, "Mantenimientos");
+        });
 
         // Add to root
         rootPanel.add(sidebar, BorderLayout.WEST);
         rootPanel.add(contentArea, BorderLayout.CENTER);
         
         add(rootPanel);
+        
+        // Load initial data for Dashboard
+        panelDashboard.cargarDatos();
     }
     
     private JButton createMenuButton(String text, boolean isPrimary) {
