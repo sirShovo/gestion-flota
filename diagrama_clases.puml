@@ -1,0 +1,159 @@
+@startuml
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+
+package "com.flota.models" {
+    enum EstadoAsignacion {
+        ACTIVA
+        FINALIZADA
+    }
+    
+    enum EstadoMantenimiento {
+        EN_PROGRESO
+        FINALIZADO
+    }
+    
+    enum EstadoVehiculo {
+        DISPONIBLE
+        EN_USO
+        MANTENIMIENTO
+    }
+    
+    enum TipoMantenimiento {
+        PREVENTIVO
+        CORRECTIVO
+    }
+
+    class Conductor {
+        - id: int
+        - nombre: String
+        - cedula: String
+        - telefono: String
+        - licencia: String
+        - activo: boolean
+        + Conductor(id: int, nombre: String, cedula: String, telefono: String, licencia: String)
+        + isActivo(): boolean
+    }
+
+    class Vehiculo {
+        - id: int
+        - placa: String
+        - marca: String
+        - modelo: String
+        - tipo: String
+        - kilometraje: double
+        - estado: EstadoVehiculo
+        + Vehiculo(id: int, placa: String, marca: String, modelo: String, tipo: String, kilometraje: double)
+        + getEstado(): EstadoVehiculo
+        + setEstado(estado: EstadoVehiculo)
+    }
+
+    class Asignacion {
+        - id: int
+        - conductor: Conductor
+        - vehiculo: Vehiculo
+        - fechaAsignacion: LocalDateTime
+        - fechaFinalizacion: LocalDateTime
+        - estado: EstadoAsignacion
+        + Asignacion(id: int, conductor: Conductor, vehiculo: Vehiculo)
+        + getEstado(): EstadoAsignacion
+        + setEstado(estado: EstadoAsignacion)
+    }
+
+    class Mantenimiento {
+        - id: int
+        - vehiculo: Vehiculo
+        - tipo: TipoMantenimiento
+        - descripcion: String
+        - costo: double
+        - fecha: LocalDateTime
+        - estado: EstadoMantenimiento
+        + Mantenimiento(id: int, vehiculo: Vehiculo, tipo: TipoMantenimiento, descripcion: String, costo: double)
+        + getEstado(): EstadoMantenimiento
+        + setEstado(estado: EstadoMantenimiento)
+    }
+}
+
+package "com.flota.services" {
+    class ConductorService {
+        - conductores: List<Conductor>
+        - nextId: int
+        + ConductorService()
+        + registrarConductor(...)
+        + buscarPorCedula(...)
+        + buscarPorId(...)
+        + obtenerTodos()
+    }
+    
+    class VehiculoService {
+        - vehiculos: List<Vehiculo>
+        - nextId: int
+        + VehiculoService()
+        + registrarVehiculo(...)
+        + buscarPorPlaca(...)
+        + buscarPorId(...)
+        + obtenerTodos()
+        + obtenerPorEstado(...)
+    }
+    
+    class AsignacionService {
+        - asignaciones: List<Asignacion>
+        - nextId: int
+        + AsignacionService()
+        + asignarVehiculo(...)
+        + finalizarAsignacion(...)
+        + buscarPorId(...)
+        + obtenerActivas()
+        + obtenerTodas()
+    }
+    
+    class MantenimientoService {
+        - mantenimientos: List<Mantenimiento>
+        - nextId: int
+        + MantenimientoService()
+        + registrarMantenimiento(...)
+        + finalizarMantenimiento(...)
+        + buscarPorId(...)
+        + obtenerHistorial()
+    }
+}
+
+class Main {
+    - {static} conductorService: ConductorService
+    - {static} vehiculoService: VehiculoService
+    - {static} asignacionService: AsignacionService
+    - {static} mantenimientoService: MantenimientoService
+    - {static} scanner: Scanner
+    + {static} main(args: String[])
+    - {static} mostrarMenu()
+    - {static} registrarConductor()
+    - {static} registrarVehiculo()
+    - {static} asignarVehiculo()
+    - {static} finalizarAsignacion()
+    - {static} registrarMantenimiento()
+    - {static} finalizarMantenimiento()
+    - {static} consultarInformacion()
+}
+
+' Relaciones de Clases de Modelos (Agregación/Composición)
+Vehiculo "1" *-- "1" EstadoVehiculo
+Asignacion "*" *-- "1" Conductor
+Asignacion "*" *-- "1" Vehiculo
+Asignacion "1" *-- "1" EstadoAsignacion
+Mantenimiento "*" *-- "1" Vehiculo
+Mantenimiento "1" *-- "1" TipoMantenimiento
+Mantenimiento "1" *-- "1" EstadoMantenimiento
+
+' Interacciones con Servicios
+ConductorService "*" o-- "1..*" Conductor
+VehiculoService "*" o-- "1..*" Vehiculo
+AsignacionService "*" o-- "1..*" Asignacion
+MantenimientoService "*" o-- "1..*" Mantenimiento
+
+' Interacciones con Controlador (Main)
+Main ..> ConductorService : "Usa"
+Main ..> VehiculoService : "Usa"
+Main ..> AsignacionService : "Usa"
+Main ..> MantenimientoService : "Usa"
+
+@enduml
