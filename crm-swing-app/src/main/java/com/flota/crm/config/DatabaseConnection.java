@@ -1,21 +1,37 @@
 package com.flota.crm.config;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class DatabaseConnection {
-    // Modify these constants based on the user's PostgreSQL setup
-    private static final String URL = "jdbc:postgresql://localhost:5432/flota_crm_db";
-    private static final String USER = "postgres";
-    private static final String PASSWORD = "Demonologie2025++"; // Defaulting to admin or postgres
+    private static final Properties properties = new Properties();
+
+    static {
+        try (InputStream input = DatabaseConnection.class.getClassLoader().getResourceAsStream("database.properties")) {
+            if (input == null) {
+                System.err.println("Lo siento, no se pudo encontrar database.properties");
+            } else {
+                properties.load(input);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     public static Connection getConnection() throws SQLException {
         try {
-            Class.forName("org.postgresql.Driver");
+            Class.forName(properties.getProperty("db.driver", "com.mysql.cj.jdbc.Driver"));
         } catch (ClassNotFoundException e) {
-            System.err.println("PostgreSQL Driver not found: " + e.getMessage());
+            System.err.println("Driver de base de datos no encontrado: " + e.getMessage());
         }
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        
+        String url = properties.getProperty("db.url");
+        String user = properties.getProperty("db.user");
+        String password = properties.getProperty("db.password");
+        
+        return DriverManager.getConnection(url, user, password);
     }
 }

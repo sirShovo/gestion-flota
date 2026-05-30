@@ -30,7 +30,7 @@ public class PanelVehiculos extends JPanel {
         JLabel lblTitle = new JLabel("Flota de Vehículos");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
         
-        JButton btnNuevo = new JButton("+ Nuevo Vehículo");
+        JButton btnNuevo = UIUtils.createPrimaryButton("+ Nuevo Vehículo");
         btnNuevo.addActionListener(e -> mostrarDialogoNuevo());
         
         headerPanel.add(lblTitle, BorderLayout.WEST);
@@ -66,10 +66,11 @@ public class PanelVehiculos extends JPanel {
 
     private void mostrarDialogoNuevo() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Nuevo Vehículo", true);
-        dialog.setSize(400, 350);
+        dialog.setSize(400, 550);
         dialog.setLocationRelativeTo(this);
         
-        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 15));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         JTextField txtPlaca = new JTextField();
@@ -78,21 +79,41 @@ public class PanelVehiculos extends JPanel {
         JTextField txtTipo = new JTextField();
         JTextField txtKm = new JTextField("0.0");
         
-        panel.add(new JLabel("Placa:")); panel.add(txtPlaca);
-        panel.add(new JLabel("Marca:")); panel.add(txtMarca);
-        panel.add(new JLabel("Modelo:")); panel.add(txtModelo);
-        panel.add(new JLabel("Tipo:")); panel.add(txtTipo);
-        panel.add(new JLabel("Kilometraje:")); panel.add(txtKm);
+        JLabel[] errPlaca = new JLabel[1];
+        JLabel[] errMarca = new JLabel[1];
+        JLabel[] errModelo = new JLabel[1];
+        JLabel[] errTipo = new JLabel[1];
+        JLabel[] errKm = new JLabel[1];
         
-        JButton btnGuardar = new JButton("Guardar");
+        panel.add(UIUtils.createValidatedField("Placa:", txtPlaca, l -> errPlaca[0] = l));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(UIUtils.createValidatedField("Marca:", txtMarca, l -> errMarca[0] = l));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(UIUtils.createValidatedField("Modelo:", txtModelo, l -> errModelo[0] = l));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(UIUtils.createValidatedField("Tipo:", txtTipo, l -> errTipo[0] = l));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(UIUtils.createValidatedField("Kilometraje:", txtKm, l -> errKm[0] = l));
+        panel.add(Box.createVerticalStrut(15));
+        
+        JButton btnGuardar = UIUtils.createPrimaryButton("Guardar");
         btnGuardar.addActionListener(e -> {
+            boolean valid = true;
+            valid &= UIUtils.validateEmpty(txtPlaca, errPlaca[0], "Obligatorio");
+            valid &= UIUtils.validateEmpty(txtMarca, errMarca[0], "Obligatorio");
+            valid &= UIUtils.validateEmpty(txtModelo, errModelo[0], "Obligatorio");
+            valid &= UIUtils.validateEmpty(txtTipo, errTipo[0], "Obligatorio");
+            valid &= UIUtils.validateEmpty(txtKm, errKm[0], "Obligatorio");
+            
+            if (!valid) return;
+            
             Vehiculo v = new Vehiculo();
-            v.setPlaca(txtPlaca.getText());
-            v.setMarca(txtMarca.getText());
-            v.setModelo(txtModelo.getText());
-            v.setTipo(txtTipo.getText());
+            v.setPlaca(txtPlaca.getText().trim());
+            v.setMarca(txtMarca.getText().trim());
+            v.setModelo(txtModelo.getText().trim());
+            v.setTipo(txtTipo.getText().trim());
             try {
-                v.setKilometraje(Double.parseDouble(txtKm.getText()));
+                v.setKilometraje(Double.parseDouble(txtKm.getText().trim()));
             } catch (NumberFormatException ex) {
                 v.setKilometraje(0.0);
             }
@@ -106,7 +127,9 @@ public class PanelVehiculos extends JPanel {
             }
         });
         
-        panel.add(new JLabel()); panel.add(btnGuardar);
+        JPanel bp = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bp.add(btnGuardar);
+        panel.add(bp);
         
         dialog.add(panel);
         dialog.setVisible(true);

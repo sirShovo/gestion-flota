@@ -15,6 +15,7 @@ public class MainFrame extends JFrame {
     private PanelVehiculos panelVehiculos;
     private PanelAsignaciones panelAsignaciones;
     private PanelMantenimientos panelMantenimientos;
+    private PanelUsuarios panelUsuarios;
 
     public MainFrame() {
         setTitle("CRM - Gestión de Flota Vehicular");
@@ -40,12 +41,14 @@ public class MainFrame extends JFrame {
         JButton btnVehiculos = createMenuButton("Vehículos", false);
         JButton btnAsignaciones = createMenuButton("Asignaciones", false);
         JButton btnMantenimientos = createMenuButton("Mantenimientos", false);
+        JButton btnUsuarios = createMenuButton("Usuarios", false);
         
         sidebar.add(btnDashboard);
         sidebar.add(btnConductores);
         sidebar.add(btnVehiculos);
         sidebar.add(btnAsignaciones);
         sidebar.add(btnMantenimientos);
+        sidebar.add(btnUsuarios);
 
         // --- Main Content Area ---
         cardLayout = new CardLayout();
@@ -59,6 +62,7 @@ public class MainFrame extends JFrame {
         panelVehiculos = new PanelVehiculos();
         panelAsignaciones = new PanelAsignaciones();
         panelMantenimientos = new PanelMantenimientos();
+        panelUsuarios = new PanelUsuarios();
         
         // Añadir paneles al CardLayout
         contentArea.add(panelDashboard, "Dashboard");
@@ -66,6 +70,7 @@ public class MainFrame extends JFrame {
         contentArea.add(panelVehiculos, "Vehiculos");
         contentArea.add(panelAsignaciones, "Asignaciones");
         contentArea.add(panelMantenimientos, "Mantenimientos");
+        contentArea.add(panelUsuarios, "Usuarios");
 
         // Listeners for buttons - ALWAYS reload data before showing the panel
         btnDashboard.addActionListener(e -> {
@@ -87,6 +92,10 @@ public class MainFrame extends JFrame {
         btnMantenimientos.addActionListener(e -> {
             panelMantenimientos.cargarDatos();
             cardLayout.show(contentArea, "Mantenimientos");
+        });
+        btnUsuarios.addActionListener(e -> {
+            panelUsuarios.cargarDatos();
+            cardLayout.show(contentArea, "Usuarios");
         });
 
         // Add to root

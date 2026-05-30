@@ -31,7 +31,7 @@ public class PanelConductores extends JPanel {
         JLabel lblTitle = new JLabel("Gestión de Conductores");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
         
-        JButton btnNuevo = new JButton("+ Nuevo Conductor");
+        JButton btnNuevo = UIUtils.createPrimaryButton("+ Nuevo Conductor");
         btnNuevo.addActionListener(e -> mostrarDialogoNuevo());
         
         headerPanel.add(lblTitle, BorderLayout.WEST);
@@ -68,10 +68,11 @@ public class PanelConductores extends JPanel {
 
     private void mostrarDialogoNuevo() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Nuevo Conductor", true);
-        dialog.setSize(400, 350);
+        dialog.setSize(400, 480);
         dialog.setLocationRelativeTo(this);
         
-        JPanel panel = new JPanel(new GridLayout(5, 2, 10, 15));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         JTextField txtNombre = new JTextField();
@@ -79,18 +80,35 @@ public class PanelConductores extends JPanel {
         JTextField txtTelefono = new JTextField();
         JTextField txtLicencia = new JTextField();
         
-        panel.add(new JLabel("Nombre Completo:")); panel.add(txtNombre);
-        panel.add(new JLabel("Cédula:")); panel.add(txtCedula);
-        panel.add(new JLabel("Teléfono:")); panel.add(txtTelefono);
-        panel.add(new JLabel("Licencia:")); panel.add(txtLicencia);
+        JLabel[] errNombre = new JLabel[1];
+        JLabel[] errCedula = new JLabel[1];
+        JLabel[] errTelefono = new JLabel[1];
+        JLabel[] errLicencia = new JLabel[1];
         
-        JButton btnGuardar = new JButton("Guardar");
+        panel.add(UIUtils.createValidatedField("Nombre Completo:", txtNombre, l -> errNombre[0] = l));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(UIUtils.createValidatedField("Cédula:", txtCedula, l -> errCedula[0] = l));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(UIUtils.createValidatedField("Teléfono:", txtTelefono, l -> errTelefono[0] = l));
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(UIUtils.createValidatedField("Licencia:", txtLicencia, l -> errLicencia[0] = l));
+        panel.add(Box.createVerticalStrut(15));
+        
+        JButton btnGuardar = UIUtils.createPrimaryButton("Guardar");
         btnGuardar.addActionListener(e -> {
+            boolean valid = true;
+            valid &= UIUtils.validateEmpty(txtNombre, errNombre[0], "Obligatorio");
+            valid &= UIUtils.validateEmpty(txtCedula, errCedula[0], "Obligatorio");
+            valid &= UIUtils.validateEmpty(txtTelefono, errTelefono[0], "Obligatorio");
+            valid &= UIUtils.validateEmpty(txtLicencia, errLicencia[0], "Obligatorio");
+            
+            if (!valid) return;
+            
             Conductor c = new Conductor();
-            c.setNombre(txtNombre.getText());
-            c.setCedula(txtCedula.getText());
-            c.setTelefono(txtTelefono.getText());
-            c.setLicencia(txtLicencia.getText());
+            c.setNombre(txtNombre.getText().trim());
+            c.setCedula(txtCedula.getText().trim());
+            c.setTelefono(txtTelefono.getText().trim());
+            c.setLicencia(txtLicencia.getText().trim());
             
             if (conductorDAO.insertar(c)) {
                 cargarDatos();
@@ -101,7 +119,9 @@ public class PanelConductores extends JPanel {
             }
         });
         
-        panel.add(new JLabel()); panel.add(btnGuardar);
+        JPanel bp = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        bp.add(btnGuardar);
+        panel.add(bp);
         
         dialog.add(panel);
         dialog.setVisible(true);
