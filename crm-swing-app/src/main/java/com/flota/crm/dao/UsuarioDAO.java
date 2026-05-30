@@ -15,15 +15,16 @@ import java.util.List;
 public class UsuarioDAO {
 
     public boolean insertar(Usuario usuario) {
-        String sql = "INSERT INTO usuarios (email, password_hash, activo, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
+        String sql = "INSERT INTO usuarios (nombre, email, password_hash, activo, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
              
-            pstmt.setString(1, usuario.getEmail());
+            pstmt.setString(1, usuario.getNombre() != null ? usuario.getNombre() : "Administrador");
+            pstmt.setString(2, usuario.getEmail());
             // Hashear la contraseña antes de guardar
             String hashed = BCrypt.hashpw(usuario.getPasswordHash(), BCrypt.gensalt());
-            pstmt.setString(2, hashed);
-            pstmt.setBoolean(3, usuario.isActivo());
+            pstmt.setString(3, hashed);
+            pstmt.setBoolean(4, usuario.isActivo());
             
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -42,6 +43,7 @@ public class UsuarioDAO {
             while (rs.next()) {
                 Usuario u = new Usuario();
                 u.setId(rs.getInt("id"));
+                u.setNombre(rs.getString("nombre"));
                 u.setEmail(rs.getString("email"));
                 u.setPasswordHash(rs.getString("password_hash"));
                 u.setActivo(rs.getBoolean("activo"));
@@ -53,6 +55,22 @@ public class UsuarioDAO {
             System.err.println("Error al obtener usuarios: " + e.getMessage());
         }
         return usuarios;
+    }
+
+    public boolean actualizar(Usuario usuario) {
+        String sql = "UPDATE usuarios SET nombre = ?, email = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+            pstmt.setString(1, usuario.getNombre());
+            pstmt.setString(2, usuario.getEmail());
+            pstmt.setInt(3, usuario.getId());
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar usuario: " + e.getMessage());
+            return false;
+        }
     }
 
     public boolean actualizarContrasena(int id, String nuevaContrasena) {
@@ -108,6 +126,7 @@ public class UsuarioDAO {
                 if (BCrypt.checkpw(passwordPlan, storedHash)) {
                     Usuario u = new Usuario();
                     u.setId(rs.getInt("id"));
+                    u.setNombre(rs.getString("nombre"));
                     u.setEmail(rs.getString("email"));
                     u.setPasswordHash(storedHash);
                     u.setActivo(activo);
@@ -134,6 +153,7 @@ public class UsuarioDAO {
              
             if (rs.next() && rs.getInt(1) == 0) {
                 Usuario admin = new Usuario();
+                admin.setNombre("Administrador Root");
                 admin.setEmail("bornacelly99@gmail.com");
                 admin.setPasswordHash("admin123"); // Será hasheado en insertar()
                 admin.setActivo(true);

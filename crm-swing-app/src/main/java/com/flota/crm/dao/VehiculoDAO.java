@@ -53,4 +53,37 @@ public class VehiculoDAO {
             return false;
         }
     }
+
+    public boolean actualizar(Vehiculo vehiculo) {
+        String sql = "UPDATE vehiculos SET placa = ?, marca = ?, modelo = ?, tipo = ?, kilometraje = ?, estado = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            stmt.setString(1, vehiculo.getPlaca());
+            stmt.setString(2, vehiculo.getMarca());
+            stmt.setString(3, vehiculo.getModelo());
+            stmt.setString(4, vehiculo.getTipo());
+            stmt.setDouble(5, vehiculo.getKilometraje());
+            stmt.setString(6, vehiculo.getEstado());
+            stmt.setInt(7, vehiculo.getId());
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean eliminar(int id) {
+        String sql = "UPDATE vehiculos SET estado = 'ELIMINADO' WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

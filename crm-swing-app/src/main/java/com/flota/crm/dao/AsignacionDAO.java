@@ -109,4 +109,65 @@ public class AsignacionDAO {
             }
         }
     }
+
+    public boolean actualizar(Asignacion asignacion) {
+        String sql = "UPDATE asignaciones SET conductor_id = ?, vehiculo_id = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            stmt.setInt(1, asignacion.getConductorId());
+            stmt.setInt(2, asignacion.getVehiculoId());
+            stmt.setInt(3, asignacion.getId());
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean eliminar(int id) {
+        // En lugar de borrar, la pasamos a CANCELADA y devolvemos el vehiculo
+        String getVehiculo = "SELECT vehiculo_id FROM asignaciones WHERE id = ?";
+        String sqlUpdateAsignacion = "UPDATE asignaciones SET estado = 'CANCELADA', fecha_finalizacion = CURRENT_TIMESTAMP WHERE id = ?";
+        String sqlUpdateVehiculo = "UPDATE vehiculos SET estado = 'DISPONIBLE' WHERE id = ?";
+        
+        Connection conn = null;
+        try {
+            conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false);
+            
+            int idVehiculo = -1;
+            try (PreparedStatement stmt = conn.prepareStatement(getVehiculo)) {
+                stmt.setInt(1, id);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) idVehiculo = rs.getInt(1);
+            }
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sqlUpdateAsignacion)) {
+                stmt.setInt(1, id);
+                stmt.executeUpdate();
+            }
+            
+            if (idVehiculo != -1) {
+                try (PreparedStatement stmt2 = conn.prepareStatement(sqlUpdateVehiculo)) {
+                    stmt2.setInt(1, idVehiculo);
+                    stmt2.executeUpdate();
+                }
+            }
+            
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        }
+    }
 }

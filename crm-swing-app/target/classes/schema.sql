@@ -6,6 +6,7 @@ USE flota_crm_db;
 -- Tabla de Usuarios (con fechas de auditoría)
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) DEFAULT 'Usuario del Sistema',
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     activo BOOLEAN DEFAULT true,

@@ -56,6 +56,14 @@ public class App {
             Conductor c = ctx.bodyAsClass(Conductor.class);
             if(conductorDAO.insertar(c)) ctx.status(201); else ctx.status(500);
         });
+        app.put("/api/conductores", ctx -> {
+            Conductor c = ctx.bodyAsClass(Conductor.class);
+            if(conductorDAO.actualizar(c)) ctx.status(200); else ctx.status(500);
+        });
+        app.delete("/api/conductores/{id}", ctx -> {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            if(conductorDAO.eliminar(id)) ctx.status(200); else ctx.status(500);
+        });
 
         // Vehiculos
         app.get("/api/vehiculos", ctx -> ctx.json(vehiculoDAO.obtenerTodos()));
@@ -63,12 +71,28 @@ public class App {
             Vehiculo v = ctx.bodyAsClass(Vehiculo.class);
             if(vehiculoDAO.insertar(v)) ctx.status(201); else ctx.status(500);
         });
+        app.put("/api/vehiculos", ctx -> {
+            Vehiculo v = ctx.bodyAsClass(Vehiculo.class);
+            if(vehiculoDAO.actualizar(v)) ctx.status(200); else ctx.status(500);
+        });
+        app.delete("/api/vehiculos/{id}", ctx -> {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            if(vehiculoDAO.eliminar(id)) ctx.status(200); else ctx.status(500);
+        });
 
         // Asignaciones
         app.get("/api/asignaciones", ctx -> ctx.json(asignacionDAO.obtenerTodas()));
         app.post("/api/asignaciones", ctx -> {
             Asignacion a = ctx.bodyAsClass(Asignacion.class);
             if(asignacionDAO.insertar(a)) ctx.status(201); else ctx.status(500);
+        });
+        app.put("/api/asignaciones", ctx -> {
+            Asignacion a = ctx.bodyAsClass(Asignacion.class);
+            if(asignacionDAO.actualizar(a)) ctx.status(200); else ctx.status(500);
+        });
+        app.delete("/api/asignaciones/{id}", ctx -> {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            if(asignacionDAO.eliminar(id)) ctx.status(200); else ctx.status(500);
         });
         app.post("/api/asignaciones/finalizar", ctx -> {
             Map<String, Integer> body = ctx.bodyAsClass(Map.class);
@@ -81,6 +105,14 @@ public class App {
             Mantenimiento m = ctx.bodyAsClass(Mantenimiento.class);
             if(mantenimientoDAO.insertar(m)) ctx.status(201); else ctx.status(500);
         });
+        app.put("/api/mantenimientos", ctx -> {
+            Mantenimiento m = ctx.bodyAsClass(Mantenimiento.class);
+            if(mantenimientoDAO.actualizar(m)) ctx.status(200); else ctx.status(500);
+        });
+        app.delete("/api/mantenimientos/{id}", ctx -> {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            if(mantenimientoDAO.eliminar(id)) ctx.status(200); else ctx.status(500);
+        });
         app.post("/api/mantenimientos/finalizar", ctx -> {
             Map<String, Integer> body = ctx.bodyAsClass(Map.class);
             if(mantenimientoDAO.finalizar(body.get("idMantenimiento"), body.get("idVehiculo"))) ctx.status(200); else ctx.status(500);
@@ -92,9 +124,50 @@ public class App {
             Usuario u = ctx.bodyAsClass(Usuario.class);
             if(usuarioDAO.insertar(u)) ctx.status(201); else ctx.status(500);
         });
-        app.post("/api/usuarios/desactivar/{id}", ctx -> {
+        app.put("/api/usuarios", ctx -> {
+            Usuario u = ctx.bodyAsClass(Usuario.class);
+            if(usuarioDAO.actualizar(u)) ctx.status(200); else ctx.status(500);
+        });
+        app.put("/api/usuarios/{id}/password", ctx -> {
+            int id = Integer.parseInt(ctx.pathParam("id"));
+            Map<String, String> body = ctx.bodyAsClass(Map.class);
+            if(usuarioDAO.actualizarContrasena(id, body.get("password"))) ctx.status(200); else ctx.status(500);
+        });
+        app.delete("/api/usuarios/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             if(usuarioDAO.desactivar(id)) ctx.status(200); else ctx.status(500);
+        });
+        
+        // Búsqueda Global (simplificada)
+        app.get("/api/search", ctx -> {
+            String q = ctx.queryParam("q");
+            if (q == null || q.isBlank()) {
+                ctx.json(List.of());
+                return;
+            }
+            q = q.toLowerCase();
+            
+            // Simulación de búsqueda en memoria combinando DAOs.
+            // En producción sería ideal una consulta SQL con UNION o un ElasticSearch.
+            List<Map<String, String>> results = new java.util.ArrayList<>();
+            
+            for (Conductor c : conductorDAO.obtenerTodos()) {
+                if (c.getNombre().toLowerCase().contains(q) || c.getCedula().toLowerCase().contains(q)) {
+                    results.add(Map.of("type", "Conductor", "title", c.getNombre(), "subtitle", "C.C: " + c.getCedula(), "target", "conductores-view"));
+                }
+            }
+            for (Vehiculo v : vehiculoDAO.obtenerTodos()) {
+                if (v.getPlaca().toLowerCase().contains(q) || v.getMarca().toLowerCase().contains(q)) {
+                    results.add(Map.of("type", "Vehículo", "title", v.getPlaca() + " - " + v.getMarca(), "subtitle", "Modelo: " + v.getModelo(), "target", "vehiculos-view"));
+                }
+            }
+            for (Usuario u : usuarioDAO.obtenerTodos()) {
+                if (u.getNombre().toLowerCase().contains(q) || u.getEmail().toLowerCase().contains(q)) {
+                    results.add(Map.of("type", "Usuario", "title", u.getNombre(), "subtitle", u.getEmail(), "target", "usuarios-view"));
+                }
+            }
+            
+            ctx.json(results);
         });
     }
 }

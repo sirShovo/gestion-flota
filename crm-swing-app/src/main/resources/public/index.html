@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body data-theme="light">
 
     <!-- Pantalla de Login -->
     <div id="login-screen">
@@ -25,7 +25,7 @@
                     <div class="error-text" id="password-error">La contraseña es obligatoria</div>
                 </div>
                 <div class="error-text" id="auth-error" style="margin-bottom: 1rem; text-align: center; font-weight: bold;"></div>
-                <button type="submit" class="btn-primary">Iniciar Sesión</button>
+                <button type="submit" class="btn-primary" style="width:100%">Iniciar Sesión</button>
             </form>
         </div>
     </div>
@@ -61,127 +61,215 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
                 Usuarios
             </button>
-            <div style="flex:1"></div>
-            <button class="nav-item" id="logout-btn" style="color: var(--danger-color)">
-                Cerrar Sesión
-            </button>
         </aside>
 
-        <!-- Contenido Principal -->
-        <main class="main-content">
-            <header class="header">
-                <h1 id="view-title">Dashboard</h1>
+        <!-- Wrapper Principal -->
+        <div class="main-wrapper">
+            
+            <!-- Barra Superior (Header) -->
+            <header class="topbar">
+                <div class="search-container">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="global-search" class="search-input" placeholder="Buscar conductores, vehículos, usuarios..." autocomplete="off">
+                    <div id="search-results" class="search-results"></div>
+                </div>
+                
+                <div class="topbar-actions">
+                    <button class="theme-toggle" id="theme-toggle" title="Cambiar Tema">
+                        <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                        <svg id="sun-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </button>
+                    
+                    <div class="user-menu-container">
+                        <button class="user-profile-btn" id="user-menu-btn">
+                            <span id="topbar-username">Usuario</span>
+                            <div class="user-avatar" id="topbar-avatar">U</div>
+                        </button>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <button class="dropdown-item" id="btn-mi-perfil">Mi Perfil</button>
+                            <button class="dropdown-item text-danger" id="logout-btn">Cerrar Sesión</button>
+                        </div>
+                    </div>
+                </div>
             </header>
 
-            <!-- Vistas -->
-            <div id="dashboard-view" class="view">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-title">Asignaciones Activas</div>
-                        <div class="stat-value" id="stat-asignaciones">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-title">Costos Mantenimiento</div>
-                        <div class="stat-value" id="stat-costos">$0.00</div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="conductores-view" class="view hidden">
-                <div class="card">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nombre</th>
-                                    <th>Cédula</th>
-                                    <th>Teléfono</th>
-                                    <th>Licencia</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-conductores"></tbody>
-                        </table>
+            <!-- Contenido Dinámico -->
+            <main class="main-content">
+                
+                <!-- Vistas -->
+                <div id="dashboard-view" class="view">
+                    <header class="header">
+                        <h1 id="view-title">Dashboard</h1>
+                    </header>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-title">Asignaciones Activas</div>
+                            <div class="stat-value" id="stat-asignaciones">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Costos Mantenimiento</div>
+                            <div class="stat-value" id="stat-costos">$0.00</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="vehiculos-view" class="view hidden">
-                <div class="card">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Placa</th>
-                                    <th>Marca</th>
-                                    <th>Modelo</th>
-                                    <th>Tipo</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-vehiculos"></tbody>
-                        </table>
+                <div id="conductores-view" class="view hidden">
+                    <header class="header">
+                        <h1>Conductores</h1>
+                        <button class="btn-primary" onclick="openModal('conductor')">Nuevo Conductor</button>
+                    </header>
+                    <div class="card">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Cédula</th>
+                                        <th>Teléfono</th>
+                                        <th>Licencia</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-conductores"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="asignaciones-view" class="view hidden">
-                <div class="card">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Conductor ID</th>
-                                    <th>Vehículo ID</th>
-                                    <th>Fecha Asignación</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-asignaciones"></tbody>
-                        </table>
+                <div id="vehiculos-view" class="view hidden">
+                    <header class="header">
+                        <h1>Vehículos</h1>
+                        <button class="btn-primary" onclick="openModal('vehiculo')">Nuevo Vehículo</button>
+                    </header>
+                    <div class="card">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Placa</th>
+                                        <th>Marca</th>
+                                        <th>Modelo</th>
+                                        <th>Tipo</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-vehiculos"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="mantenimientos-view" class="view hidden">
-                <div class="card">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Vehículo ID</th>
-                                    <th>Tipo</th>
-                                    <th>Costo</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-mantenimientos"></tbody>
-                        </table>
+                <div id="asignaciones-view" class="view hidden">
+                    <header class="header">
+                        <h1>Asignaciones</h1>
+                        <button class="btn-primary" onclick="openModal('asignacion')">Nueva Asignación</button>
+                    </header>
+                    <div class="card">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Conductor</th>
+                                        <th>Vehículo</th>
+                                        <th>Fecha Asignación</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-asignaciones"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="usuarios-view" class="view hidden">
-                <div class="card">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Email</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabla-usuarios"></tbody>
-                        </table>
+                <div id="mantenimientos-view" class="view hidden">
+                    <header class="header">
+                        <h1>Mantenimientos</h1>
+                        <button class="btn-primary" onclick="openModal('mantenimiento')">Nuevo Mantenimiento</button>
+                    </header>
+                    <div class="card">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Vehículo</th>
+                                        <th>Tipo</th>
+                                        <th>Costo</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-mantenimientos"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-        </main>
+                <div id="usuarios-view" class="view hidden">
+                    <header class="header">
+                        <h1>Usuarios del Sistema</h1>
+                        <button class="btn-primary" onclick="openModal('usuario')">Nuevo Usuario</button>
+                    </header>
+                    <div class="user-grid" id="grid-usuarios">
+                        <!-- Tarjetas inyectadas por JS -->
+                    </div>
+                </div>
+
+                <div id="perfil-view" class="view hidden">
+                    <header class="header">
+                        <h1>Mi Perfil</h1>
+                    </header>
+                    <div class="card" style="max-width: 600px;">
+                        <form id="perfil-form">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" id="perfil-nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Correo Electrónico</label>
+                                <input type="email" id="perfil-email" required>
+                            </div>
+                            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border-color);">
+                            <h3>Cambiar Contraseña</h3>
+                            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">Deje los campos en blanco si no desea cambiar su contraseña.</p>
+                            
+                            <div class="form-group">
+                                <label>Nueva Contraseña</label>
+                                <input type="password" id="perfil-pass1">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirmar Contraseña</label>
+                                <input type="password" id="perfil-pass2">
+                                <div class="error-text" id="perfil-pass-error">Las contraseñas no coinciden</div>
+                            </div>
+                            <button type="submit" class="btn-primary">Guardar Cambios</button>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal CRUD Genérico -->
+    <div class="modal-overlay" id="crud-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Detalle</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="crud-form">
+                    <div id="modal-form-content"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-danger hidden" id="modal-btn-delete" type="button">Eliminar</button>
+                <button class="btn-secondary" id="modal-btn-edit" type="button">Editar</button>
+                <button class="btn-primary hidden" id="modal-btn-save" type="button" onclick="submitCrudForm()">Guardar</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>

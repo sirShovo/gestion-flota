@@ -109,4 +109,34 @@ public class MantenimientoDAO {
             }
         }
     }
+
+    public boolean actualizar(Mantenimiento mantenimiento) {
+        String sql = "UPDATE mantenimientos SET tipo = ?, descripcion = ?, costo = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            stmt.setString(1, mantenimiento.getTipo());
+            stmt.setString(2, mantenimiento.getDescripcion());
+            stmt.setDouble(3, mantenimiento.getCosto());
+            stmt.setInt(4, mantenimiento.getId());
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean eliminar(int id) {
+        String sql = "UPDATE mantenimientos SET estado = 'CANCELADO' WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
