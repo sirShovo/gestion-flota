@@ -3,6 +3,7 @@ package com.flota.crm.views;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 
 public class MainFrame extends JFrame {
     
@@ -30,24 +31,53 @@ public class MainFrame extends JFrame {
         // Root Panel with padding
         JPanel rootPanel = new JPanel(new BorderLayout(20, 20));
         rootPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        rootPanel.setBackground(new Color(248, 250, 252)); // Slate 50
         
         // --- Sidebar (Navigation) ---
-        JPanel sidebar = new JPanel(new GridLayout(6, 1, 10, 10));
-        sidebar.setPreferredSize(new Dimension(200, 0));
-        sidebar.setBorder(BorderFactory.createTitledBorder("Menú de Navegación"));
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setPreferredSize(new Dimension(220, 0));
+        sidebar.setBackground(Color.WHITE);
+        sidebar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+                new EmptyBorder(20, 10, 20, 10)
+        ));
         
-        JButton btnDashboard = createMenuButton("Dashboard", true);
-        JButton btnConductores = createMenuButton("Conductores", false);
-        JButton btnVehiculos = createMenuButton("Vehículos", false);
-        JButton btnAsignaciones = createMenuButton("Asignaciones", false);
-        JButton btnMantenimientos = createMenuButton("Mantenimientos", false);
-        JButton btnUsuarios = createMenuButton("Usuarios", false);
+        JLabel logoLabel = new JLabel("CRM Flota");
+        logoLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        logoLabel.setForeground(new Color(15, 23, 42)); // Slate 900
+        logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        sidebar.add(logoLabel);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 30)));
+        
+        ButtonGroup menuGroup = new ButtonGroup();
+        
+        JToggleButton btnDashboard = createMenuButton("Dashboard", "icons/home.svg");
+        JToggleButton btnConductores = createMenuButton("Conductores", "icons/users.svg");
+        JToggleButton btnVehiculos = createMenuButton("Vehículos", "icons/car.svg");
+        JToggleButton btnAsignaciones = createMenuButton("Asignaciones", "icons/clipboard.svg");
+        JToggleButton btnMantenimientos = createMenuButton("Mantenimientos", "icons/tool.svg");
+        JToggleButton btnUsuarios = createMenuButton("Usuarios", "icons/users.svg");
+        
+        menuGroup.add(btnDashboard);
+        menuGroup.add(btnConductores);
+        menuGroup.add(btnVehiculos);
+        menuGroup.add(btnAsignaciones);
+        menuGroup.add(btnMantenimientos);
+        menuGroup.add(btnUsuarios);
+        
+        btnDashboard.setSelected(true);
         
         sidebar.add(btnDashboard);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 5)));
         sidebar.add(btnConductores);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 5)));
         sidebar.add(btnVehiculos);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 5)));
         sidebar.add(btnAsignaciones);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 5)));
         sidebar.add(btnMantenimientos);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 5)));
         sidebar.add(btnUsuarios);
 
         // --- Main Content Area ---
@@ -108,16 +138,24 @@ public class MainFrame extends JFrame {
         panelDashboard.cargarDatos();
     }
     
-    private JButton createMenuButton(String text, boolean isPrimary) {
-        JButton btn = new JButton(text);
+    private JToggleButton createMenuButton(String text, String iconPath) {
+        JToggleButton btn = new JToggleButton(text);
+        btn.setIcon(new FlatSVGIcon(iconPath, 20, 20));
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setIconTextGap(15);
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        btn.setMinimumSize(new Dimension(0, 45));
+        btn.setPreferredSize(new Dimension(200, 45));
+        btn.setMargin(new Insets(5, 15, 5, 15));
         
-        if (!isPrimary) {
-            btn.setBackground(Color.WHITE);
-            btn.setForeground(new Color(51, 65, 85));
-        }
+        // FlatLaf toggle button styling
+        btn.putClientProperty("JToggleButton.buttonType", "borderless");
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(new Color(71, 85, 105)); // Slate 600
+        
         return btn;
     }
 }

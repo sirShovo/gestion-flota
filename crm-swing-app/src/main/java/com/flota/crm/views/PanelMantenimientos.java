@@ -70,6 +70,7 @@ public class PanelMantenimientos extends JPanel {
         tabla.getColumnModel().getColumn(7).setWidth(0);
         
         JScrollPane scrollPane = new JScrollPane(tabla);
+        UIUtils.styleTable(tabla, scrollPane);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
 
         add(headerPanel, BorderLayout.NORTH);

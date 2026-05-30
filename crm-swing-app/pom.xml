@@ -50,6 +50,13 @@
             <version>3.4</version>
         </dependency>
 
+        <!-- FlatLaf Extras (for FlatSVGIcon support) -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-extras</artifactId>
+            <version>3.4</version>
+        </dependency>
+
         <!-- JFreeChart for Dashboard -->
         <dependency>
             <groupId>org.jfree</groupId>

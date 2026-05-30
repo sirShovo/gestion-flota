@@ -50,6 +50,7 @@ public class PanelConductores extends JPanel {
         tablaConductores.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         
         JScrollPane scrollPane = new JScrollPane(tablaConductores);
+        UIUtils.styleTable(tablaConductores, scrollPane);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
 
         add(headerPanel, BorderLayout.NORTH);

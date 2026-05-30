@@ -69,4 +69,26 @@ public class UIUtils {
         btn.setFocusPainted(false);
         return btn;
     }
+    
+    // Método para aplicar estilo "Soft UI" a tablas
+    public static void styleTable(JTable table, JScrollPane scrollPane) {
+        // Estilo general de la tabla
+        table.setRowHeight(35);
+        table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0, 0));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        table.setSelectionBackground(new Color(224, 242, 254)); // Light Blue (Sky 100)
+        table.setSelectionForeground(new Color(15, 23, 42)); // Slate 900
+        
+        // Estilo del encabezado
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        table.getTableHeader().setBackground(new Color(248, 250, 252)); // Slate 50
+        table.getTableHeader().setForeground(new Color(71, 85, 105)); // Slate 600
+        table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(226, 232, 240))); // Slate 200
+        ((javax.swing.table.DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
+        
+        // Quitar bordes del scrollpane
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+    }
 }
