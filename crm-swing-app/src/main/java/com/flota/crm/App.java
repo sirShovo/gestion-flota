@@ -147,23 +147,21 @@ public class App {
             }
             q = q.toLowerCase();
             
-            // Simulación de búsqueda en memoria combinando DAOs.
-            // En producción sería ideal una consulta SQL con UNION o un ElasticSearch.
-            List<Map<String, String>> results = new java.util.ArrayList<>();
+            List<Map<String, Object>> results = new java.util.ArrayList<>();
             
             for (Conductor c : conductorDAO.obtenerTodos()) {
                 if (c.getNombre().toLowerCase().contains(q) || c.getCedula().toLowerCase().contains(q)) {
-                    results.add(Map.of("type", "Conductor", "title", c.getNombre(), "subtitle", "C.C: " + c.getCedula(), "target", "conductores-view"));
+                    results.add(Map.of("type", "Conductor", "entityType", "conductor", "id", c.getId(), "title", c.getNombre(), "subtitle", "C.C: " + c.getCedula(), "target", "conductores-view"));
                 }
             }
             for (Vehiculo v : vehiculoDAO.obtenerTodos()) {
                 if (v.getPlaca().toLowerCase().contains(q) || v.getMarca().toLowerCase().contains(q)) {
-                    results.add(Map.of("type", "Vehículo", "title", v.getPlaca() + " - " + v.getMarca(), "subtitle", "Modelo: " + v.getModelo(), "target", "vehiculos-view"));
+                    results.add(Map.of("type", "Vehículo", "entityType", "vehiculo", "id", v.getId(), "title", v.getPlaca() + " - " + v.getMarca(), "subtitle", "Modelo: " + v.getModelo(), "target", "vehiculos-view"));
                 }
             }
             for (Usuario u : usuarioDAO.obtenerTodos()) {
                 if (u.getNombre().toLowerCase().contains(q) || u.getEmail().toLowerCase().contains(q)) {
-                    results.add(Map.of("type", "Usuario", "title", u.getNombre(), "subtitle", u.getEmail(), "target", "usuarios-view"));
+                    results.add(Map.of("type", "Usuario", "entityType", "usuario", "id", u.getId(), "title", u.getNombre(), "subtitle", u.getEmail(), "target", "usuarios-view"));
                 }
             }
             

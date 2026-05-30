@@ -2,7 +2,7 @@ let currentUser = null;
 let currentCrudEntity = null;
 let currentCrudId = null;
 
-// Caché de datos para fácil edición
+// Caché de datos para fácil edición y dropdowns
 const dataCache = {
     conductores: [],
     vehiculos: [],
@@ -46,11 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app').classList.remove('hidden');
                 
-                // Set topbar user info
                 document.getElementById('topbar-username').textContent = currentUser.nombre;
                 document.getElementById('topbar-avatar').textContent = currentUser.nombre.charAt(0).toUpperCase();
                 
-                loadDashboard();
+                // Pre-cargar datos para los dropdowns
+                await Promise.all([loadConductores(), loadVehiculos(), loadUsuarios()]);
+                switchView('dashboard-view');
+                showToast('Bienvenido al sistema', 'success');
             } else {
                 authError.textContent = 'Credenciales inválidas o usuario inactivo';
             }
@@ -131,10 +133,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="search-result-title">${r.title}</div>
                             <div class="search-result-subtitle">${r.subtitle}</div>
                         `;
-                        div.addEventListener('click', () => {
+                        div.addEventListener('click', async () => {
                             searchResults.style.display = 'none';
                             searchInput.value = '';
-                            switchView(r.target);
+                            
+                            // Navegar y abrir modal
+                            await switchView(r.target);
+                            
+                            // Buscar objeto completo en cache
+                            let cacheArray = dataCache[r.entityType + 's']; // ej: conductores
+                            let obj = cacheArray.find(x => x.id === r.id);
+                            if (obj) {
+                                showModalDetails(r.entityType, obj);
+                            }
                         });
                         searchResults.appendChild(div);
                     });
@@ -173,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('perfil-pass-error').style.display = 'block';
                 return;
             }
-            // Cambiar contraseña
             await fetch(`/api/usuarios/${currentUser.id}/password`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -181,12 +191,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // Cambiar datos
         const payload = {
             id: currentUser.id,
             nombre: document.getElementById('perfil-nombre').value,
             email: document.getElementById('perfil-email').value,
-            passwordHash: '' // Not used for update info
+            passwordHash: ''
         };
         const res = await fetch('/api/usuarios', {
             method: 'PUT',
@@ -195,28 +204,52 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         if (res.ok) {
-            alert('Perfil actualizado correctamente');
+            showToast('Perfil actualizado correctamente', 'success');
             currentUser.nombre = payload.nombre;
             currentUser.email = payload.email;
             document.getElementById('topbar-username').textContent = currentUser.nombre;
             document.getElementById('topbar-avatar').textContent = currentUser.nombre.charAt(0).toUpperCase();
+        } else {
+            showToast('Error al actualizar perfil', 'error');
         }
     });
 
 });
 
+// --- FUNCIONES TOAST ---
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'success' 
+        ? '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+        : '<svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+    
+    toast.innerHTML = `${icon} <span>${message}</span>`;
+    container.appendChild(toast);
+    
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
 // --- FUNCIONES GLOBALES DE NAVEGACIÓN ---
-function switchView(targetId) {
+async function switchView(targetId) {
     document.querySelectorAll('.view').forEach(view => view.classList.add('hidden'));
     document.getElementById(targetId).classList.remove('hidden');
     
     switch(targetId) {
-        case 'dashboard-view': loadDashboard(); break;
-        case 'conductores-view': loadConductores(); break;
-        case 'vehiculos-view': loadVehiculos(); break;
-        case 'asignaciones-view': loadAsignaciones(); break;
-        case 'mantenimientos-view': loadMantenimientos(); break;
-        case 'usuarios-view': loadUsuarios(); break;
+        case 'dashboard-view': await loadDashboard(); break;
+        case 'conductores-view': await loadConductores(); break;
+        case 'vehiculos-view': await loadVehiculos(); break;
+        case 'asignaciones-view': await loadAsignaciones(); break;
+        case 'mantenimientos-view': await loadMantenimientos(); break;
+        case 'usuarios-view': await loadUsuarios(); break;
     }
 }
 
@@ -283,8 +316,8 @@ async function loadAsignaciones() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${a.id}</td>
-                <td>${a.conductorNombre}</td>
-                <td>${a.vehiculoPlaca}</td>
+                <td>${a.conductorNombre || a.conductorId}</td>
+                <td>${a.vehiculoPlaca || a.vehiculoId}</td>
                 <td>${new Date(a.fechaAsignacion).toLocaleString()}</td>
                 <td><span style="font-weight:600">${a.estado}</span></td>
             `;
@@ -304,7 +337,7 @@ async function loadMantenimientos() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${m.id}</td>
-                <td>${m.vehiculoPlaca}</td>
+                <td>${m.vehiculoPlaca || m.vehiculoId}</td>
                 <td>${m.tipo}</td>
                 <td>$${(m.costo || 0).toFixed(2)}</td>
                 <td><span style="font-weight:600">${m.estado}</span></td>
@@ -362,19 +395,45 @@ const modalConfig = {
     ],
     asignacion: [
         { id: 'id', label: 'ID', type: 'text', readOnly: true, hiddenOnCreate: true },
-        { id: 'conductorId', label: 'ID Conductor', type: 'number', required: true },
-        { id: 'vehiculoId', label: 'ID Vehículo', type: 'number', required: true },
+        { id: 'conductorId', label: 'Conductor', type: 'select', source: 'conductores', textField: 'nombre', valField: 'id', required: true },
+        { id: 'vehiculoId', label: 'Vehículo', type: 'select', source: 'vehiculos', textField: 'placa', valField: 'id', required: true },
         { id: 'estado', label: 'Estado', type: 'text', readOnly: true, hiddenOnCreate: true }
     ],
     mantenimiento: [
         { id: 'id', label: 'ID', type: 'text', readOnly: true, hiddenOnCreate: true },
-        { id: 'vehiculoId', label: 'ID Vehículo', type: 'number', required: true },
+        { id: 'vehiculoId', label: 'Vehículo', type: 'select', source: 'vehiculos', textField: 'placa', valField: 'id', required: true },
         { id: 'tipo', label: 'Tipo', type: 'text', required: true },
         { id: 'costo', label: 'Costo', type: 'number' },
         { id: 'descripcion', label: 'Descripción', type: 'textarea' },
         { id: 'estado', label: 'Estado', type: 'text', readOnly: true, hiddenOnCreate: true }
     ]
 };
+
+function buildInputHTML(field, value = '', disabled = false) {
+    const disAttr = disabled ? 'disabled' : '';
+    const reqAttr = field.required || field.requiredOnCreate ? 'required' : '';
+    
+    if (field.type === 'textarea') {
+        return `<textarea id="crud-${field.id}" ${disAttr} ${reqAttr}>${value}</textarea>`;
+    } 
+    
+    if (field.type === 'select') {
+        let options = `<option value="">Seleccione...</option>`;
+        const list = dataCache[field.source] || [];
+        list.forEach(item => {
+            const selected = (item[field.valField] == value) ? 'selected' : '';
+            // Si es vehiculos, mostrar placa y marca
+            let text = item[field.textField];
+            if(field.source === 'vehiculos') text = item.placa + ' - ' + item.marca;
+            if(field.source === 'conductores') text = item.nombre + ' (' + item.cedula + ')';
+            
+            options += `<option value="${item[field.valField]}" ${selected}>${text}</option>`;
+        });
+        return `<select id="crud-${field.id}" ${disAttr} ${reqAttr}>${options}</select>`;
+    }
+    
+    return `<input type="${field.type}" id="crud-${field.id}" value="${value}" ${disAttr} ${reqAttr}>`;
+}
 
 function openModal(entityType) {
     currentCrudEntity = entityType;
@@ -386,15 +445,9 @@ function openModal(entityType) {
     
     modalConfig[entityType].forEach(field => {
         if (field.hiddenOnCreate) return;
-        
         const div = document.createElement('div');
         div.className = 'form-group';
-        
-        if (field.type === 'textarea') {
-            div.innerHTML = `<label>${field.label}</label><textarea id="crud-${field.id}" ${field.required ? 'required' : ''}></textarea>`;
-        } else {
-            div.innerHTML = `<label>${field.label}</label><input type="${field.type}" id="crud-${field.id}" ${field.required || field.requiredOnCreate ? 'required' : ''}>`;
-        }
+        div.innerHTML = `<label>${field.label}</label> ${buildInputHTML(field, '', false)}`;
         content.appendChild(div);
     });
 
@@ -415,15 +468,9 @@ function showModalDetails(entityType, data) {
     
     modalConfig[entityType].forEach(field => {
         if (field.hiddenOnEdit) return;
-        
         const div = document.createElement('div');
         div.className = 'form-group';
-        
-        if (field.type === 'textarea') {
-            div.innerHTML = `<label>${field.label}</label><textarea id="crud-${field.id}" disabled>${data[field.id] || ''}</textarea>`;
-        } else {
-            div.innerHTML = `<label>${field.label}</label><input type="${field.type}" id="crud-${field.id}" value="${data[field.id] || ''}" disabled>`;
-        }
+        div.innerHTML = `<label>${field.label}</label> ${buildInputHTML(field, data[field.id], true)}`;
         content.appendChild(div);
     });
 
@@ -440,9 +487,8 @@ function showModalDetails(entityType, data) {
 }
 
 function enableEditMode() {
-    const inputs = document.querySelectorAll('#modal-form-content input, #modal-form-content textarea');
+    const inputs = document.querySelectorAll('#modal-form-content input, #modal-form-content textarea, #modal-form-content select');
     inputs.forEach(input => {
-        // No habilitar campos de solo lectura
         const fieldConfig = modalConfig[currentCrudEntity].find(f => `crud-${f.id}` === input.id);
         if (fieldConfig && !fieldConfig.readOnly) {
             input.removeAttribute('disabled');
@@ -457,26 +503,21 @@ function closeModal() {
 }
 
 async function submitCrudForm() {
-    // Basic validation
     const form = document.getElementById('crud-form');
     if (!form.reportValidity()) return;
 
     const payload = {};
     modalConfig[currentCrudEntity].forEach(field => {
         const el = document.getElementById(`crud-${field.id}`);
-        if (el) {
-            payload[field.id] = el.value;
-        }
+        if (el) payload[field.id] = el.value;
     });
 
-    if (currentCrudId) {
-        payload.id = currentCrudId;
-    }
+    if (currentCrudId) payload.id = currentCrudId;
 
     const method = currentCrudId ? 'PUT' : 'POST';
-    // Pluralize for endpoint
     let endpoint = `/api/${currentCrudEntity}s`;
     if (currentCrudEntity === 'asignacion') endpoint = '/api/asignaciones';
+    if (currentCrudEntity === 'conductor') endpoint = '/api/conductores';
 
     const res = await fetch(endpoint, {
         method: method,
@@ -486,14 +527,15 @@ async function submitCrudForm() {
 
     if (res.ok) {
         closeModal();
-        // Reload current view
+        showToast(currentCrudId ? 'Actualizado correctamente' : 'Creado correctamente', 'success');
+        
         if (currentCrudEntity === 'conductor') loadConductores();
         if (currentCrudEntity === 'vehiculo') loadVehiculos();
         if (currentCrudEntity === 'asignacion') loadAsignaciones();
         if (currentCrudEntity === 'mantenimiento') loadMantenimientos();
         if (currentCrudEntity === 'usuario') loadUsuarios();
     } else {
-        alert('Ocurrió un error al guardar los datos.');
+        showToast('Error al guardar los datos', 'error');
     }
 }
 
@@ -502,16 +544,19 @@ async function deleteEntity(entityType, id) {
     
     let endpoint = `/api/${entityType}s/${id}`;
     if (entityType === 'asignacion') endpoint = `/api/asignaciones/${id}`;
+    if (entityType === 'conductor') endpoint = `/api/conductores/${id}`;
     
     const res = await fetch(endpoint, { method: 'DELETE' });
     if(res.ok) {
         closeModal();
+        showToast('Eliminado correctamente', 'success');
+        
         if (entityType === 'conductor') loadConductores();
         if (entityType === 'vehiculo') loadVehiculos();
         if (entityType === 'asignacion') loadAsignaciones();
         if (entityType === 'mantenimiento') loadMantenimientos();
         if (entityType === 'usuario') loadUsuarios();
     } else {
-        alert('Error al intentar eliminar.');
+        showToast('Error al intentar eliminar', 'error');
     }
 }
