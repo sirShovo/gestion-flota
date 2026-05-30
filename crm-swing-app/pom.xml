@@ -36,32 +36,25 @@
             <version>42.7.2</version>
         </dependency>
 
-        <!-- FlatLaf for Modern Look and Feel (Poseidon/Material style simulation) -->
+        <!-- Javalin (Lightweight Web Framework) -->
         <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf</artifactId>
-            <version>3.4</version>
-        </dependency>
-        
-        <!-- FlatLaf IntelliJ Themes (contains many sleek themes) -->
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf-intellij-themes</artifactId>
-            <version>3.4</version>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>6.1.3</version>
         </dependency>
 
-        <!-- FlatLaf Extras (for FlatSVGIcon support) -->
+        <!-- SLF4J (Required by Javalin for logging) -->
         <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf-extras</artifactId>
-            <version>3.4</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.12</version>
         </dependency>
 
-        <!-- JFreeChart for Dashboard -->
+        <!-- Jackson (For JSON Serialization/Deserialization) -->
         <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>1.5.4</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.17.0</version>
         </dependency>
     </dependencies>
 </project>

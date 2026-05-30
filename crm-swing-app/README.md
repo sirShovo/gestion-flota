@@ -70,23 +70,28 @@ Antes de ejecutar el proyecto, asegúrese de tener instalado en su sistema:
 
 ### Step 3: Compilación y Ejecución
 
-Puede ejecutar el proyecto desde la terminal o mediante un Entorno de Desarrollo Integrado (IDE).
+Esta aplicación ha sido modernizada a una **Arquitectura Web**. Al ejecutar el proyecto Java, no se abrirán ventanas de escritorio anticuadas, sino que se iniciará un servidor web de alto rendimiento.
 
-#### Opción A: Desde la Terminal (Recomendado)
-Abra una terminal de comandos en la carpeta raíz del proyecto (`crm-swing-app`) y ejecute los siguientes comandos:
+1. Abra una terminal de comandos en la carpeta raíz del proyecto (`crm-swing-app`) y ejecute los siguientes comandos:
 
-1. **Limpiar y compilar el proyecto**:
+   **Limpiar y compilar el proyecto**:
    ```bash
    mvn clean compile
    ```
 
-2. **Ejecutar la aplicación**:
+   **Ejecutar el Servidor**:
    ```bash
    mvn exec:java -Dexec.mainClass="com.flota.crm.App"
    ```
 
-#### Opción B: Desde un IDE (IntelliJ IDEA / Eclipse / VS Code)
-1. Abra la carpeta `crm-swing-app` como un proyecto Maven en su IDE.
-2. Permita que el IDE importe el archivo `pom.xml` y descargue automáticamente las dependencias (FlatLaf, BCrypt, MySQL Connector, JFreeChart).
-3. Busque la clase principal en la ruta `src/main/java/com/flota/crm/App.java`.
-4. Haga clic derecho sobre el archivo `App.java` y seleccione **Run** o **Ejecutar**.
+2. **Acceder a la Interfaz Web**:
+   Abra su navegador de preferencia (Chrome, Edge, Firefox) e ingrese a la siguiente dirección:
+   
+   **`http://localhost:8080`**
+
+### Credenciales de Acceso al Iniciar
+Una vez que cargue la interfaz web en su navegador:
+1. Aparecerá la ventana de inicio de sesión (Login) con el nuevo diseño Soft UI premium. 
+2. El sistema cuenta con un inicializador automático. Si la tabla de usuarios de MySQL está vacía, creará por defecto el siguiente usuario administrador para que pueda ingresar inmediatamente:
+   * **Correo electrónico**: `bornacelly99@gmail.com`
+   * **Contraseña**: `admin123`
